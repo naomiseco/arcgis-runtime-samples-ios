@@ -24,12 +24,13 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
     }
     @IBOutlet var changeStyleBarItem: UIBarButtonItem!
     // Array of the item IDs.
-    private let itemIDs = ["1349bfa0ed08485d8a92c442a3850b06",
-                           "bd8ac41667014d98b933e97713ba8377",
-                           "02f85ec376084c508b9c8e5a311724fa",
-                           "1bf0cc4a4380468fbbff107e100f65a5",
-                           "9a01f41307ec4add9121a40cf020a6b6",
-                           "ce8a34e5d4ca4fa193a097511daa8855"]
+    private let itemIDs: KeyValuePairs<String, String> = [
+        "default": "1349bfa0ed08485d8a92c442a3850b06",
+        "style1": "bd8ac41667014d98b933e97713ba8377",
+        "style2": "02f85ec376084c508b9c8e5a311724fa",
+        "style3": "1bf0cc4a4380468fbbff107e100f65a5",
+        "offlineDay": "9a01f41307ec4add9121a40cf020a6b6",
+        "offlineNight": "ce8a34e5d4ca4fa193a097511daa8855" ]
     // The item ID of the shown layer.
     var shownItemID: String?
     // The job to export the item resource cache.
@@ -47,8 +48,7 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
         // Create and return the full, unique URL.
         return directoryURL.appendingPathComponent("\(temporaryFileName)")
     }
-    func loadVectorTiledLayer(url vectorTiledLayerURL: URL) -> AGSArcGISVectorTiledLayer {
-        var offlineVectorTiledLayer: AGSArcGISVectorTiledLayer?
+    func loadVectorTiledLayer(url vectorTiledLayerURL: URL) {
         // Get a temporary URL to download the custom style.
         let temporaryURL = getTemporaryURL()
         // Create a vector tile cache using the local vector tile package.
@@ -73,24 +73,22 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
             }
         }
 //        try? FileManager.default.removeItem(at: temporaryURL)
-        return offlineVectorTiledLayer!
+//        return offlineVectorTiledLayer!
     }
     
-    private func showSelectedItem(_ itemID: String) {
+    private func showSelectedItem(_ itemID: (key: String, value: String)) {
         guard let map = mapView.map else { return }
-        shownItemID = itemID
-        // Set the viewpoint to display Dodge City, KS.
-        let point = AGSPoint(x: -100.01766, y: 37.76528, spatialReference: .wgs84())
-        mapView.setViewpoint(AGSViewpoint(center: point, scale: 5_000))
-        if itemID == "9a01f41307ec4add9121a40cf020a6b6" {
-            // If the custom day style is chosen, assign the local vector tile package to the basemap.
-            map.basemap = AGSBasemap(baseLayer: dayVectorTiledLayer!)
-        } else if itemID == "ce8a34e5d4ca4fa193a097511daa8855"{
+        shownItemID = itemID.value
+        // Get the vector tiled layer URL.
+        let vectorTiledLayerURL = URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=\(itemID)")!
+        if itemID.key == "offlineDay" || itemID.key == "offlineNight" {
+            
             // If the custom night style is chosen, assign the local vector tile package to the basemap.
             map.basemap = AGSBasemap(baseLayer: nightVectorTiledLayer!)
+            // Set the viewpoint to display Dodge City, KS.
+            let point = AGSPoint(x: -100.01766, y: 37.76528, spatialReference: .wgs84())
+            mapView.setViewpoint(AGSViewpoint(center: point, scale: 5_000))
         } else {
-            // Get the vector tiled layer URL.
-            let vectorTiledLayerURL = URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=\(itemID)")!
             // Create a vector tiled layer from the URL.
             let vectorTiledLayer = AGSArcGISVectorTiledLayer(url: vectorTiledLayerURL)
             map.basemap = AGSBasemap(baseLayer: vectorTiledLayer)
@@ -103,8 +101,8 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
     override func viewDidLoad() {
         super.viewDidLoad()
         // Load the offline vector tiled layers.
-        dayVectorTiledLayer = loadVectorTiledLayer(url: URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=9a01f41307ec4add9121a40cf020a6b6")!)
-        nightVectorTiledLayer = loadVectorTiledLayer(url: URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=ce8a34e5d4ca4fa193a097511daa8855")!)
+        loadVectorTiledLayer(url: URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=9a01f41307ec4add9121a40cf020a6b6")!, offlineVectorTiledLayer: dayVectorTiledLayer!)
+        loadVectorTiledLayer(url: URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=ce8a34e5d4ca4fa193a097511daa8855")!, offlineVectorTiledLayer: nightVectorTiledLayer!)
         // Show the default vector tiled layer.
         showSelectedItem(itemIDs.first!)
         // Add the source code button item to the right of navigation bar.
@@ -126,7 +124,7 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
     
     // MARK: - VectorStylesVCDelegate
     
-    func vectorStylesViewController(_ vectorStylesViewController: VectorStylesViewController, didSelectItemWithID itemID: String) {
+    func vectorStylesViewController(_ vectorStylesViewController: VectorStylesViewController, didSelectItemWithID itemID: (key: String, value: String)) {
         // Show newly the selected vector layer.
         showSelectedItem(itemID)
     }

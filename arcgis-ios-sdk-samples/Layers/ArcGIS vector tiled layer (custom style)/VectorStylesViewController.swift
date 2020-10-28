@@ -21,7 +21,7 @@ protocol VectorStylesVCDelegate: AnyObject {
 }
 
 class VectorStylesViewController: UITableViewController {
-    var itemIDs: [String] = []
+    var itemIDs = KeyValuePairs<String, String>()
     var selectedItemID: String?
     var tableViewContentSizeObservation: NSKeyValueObservation?
     
@@ -33,7 +33,7 @@ class VectorStylesViewController: UITableViewController {
             self.preferredContentSize = CGSize(width: self.preferredContentSize.width, height: tableView.contentSize.height)
         }
         if let selectedItemID = selectedItemID,
-            let row = itemIDs.firstIndex(of: selectedItemID) {
+            let row = itemIDs.firstIndex(where: { $0.value == selectedItemID }) {
             let indexPath = IndexPath(row: row, section: 0)
             tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
             let cell = tableView.cellForRow(at: indexPath)
