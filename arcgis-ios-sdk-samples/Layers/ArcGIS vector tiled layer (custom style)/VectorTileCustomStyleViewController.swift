@@ -24,17 +24,40 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
     }
     @IBOutlet var changeStyleBarItem: UIBarButtonItem!
     // Array of the item IDs.
-    private let itemIDs: KeyValuePairs<String, String> = [
-        "default": "1349bfa0ed08485d8a92c442a3850b06",
-        "style1": "bd8ac41667014d98b933e97713ba8377",
-        "style2": "02f85ec376084c508b9c8e5a311724fa",
-        "style3": "1bf0cc4a4380468fbbff107e100f65a5",
-        "offlineDay": "9a01f41307ec4add9121a40cf020a6b6",
-        "offlineNight": "ce8a34e5d4ca4fa193a097511daa8855" ]
+    private let itemIDs: KeyValuePairs<String, AGSArcGISVectorTiledLayer> = {
+        var url = URL(string: "https://arcgisruntime.maps.arcgis.com/home/item.html?id=")
+            
+        let defaultURL = url?.appendingPathComponent("1349bfa0ed08485d8a92c442a3850b06")
+        let defaultLayer = AGSArcGISVectorTiledLayer(url: defaultURL!)
+        
+        let style1URL = url?.appendingPathComponent("bd8ac41667014d98b933e97713ba8377")
+        let style1Layer = AGSArcGISVectorTiledLayer(url: style1URL!)
+        
+        let style2URL = url?.appendingPathComponent("02f85ec376084c508b9c8e5a311724fa")
+        let style2Layer = AGSArcGISVectorTiledLayer(url: style2URL!)
+        
+        let style3URL = url?.appendingPathComponent("1bf0cc4a4380468fbbff107e100f65a5")
+        let style3Layer = AGSArcGISVectorTiledLayer(url: style3URL!)
+        
+//        let customDayURL = url?.appendingPathComponent("1349bfa0ed08485d8a92c442a3850b06")
+//        loadVectorTiledLayer(url: customDayURL!)
+//        let customDayLayer = AGSArcGISVectorTiledLayer(url: defaultURL!)
+//
+//        let customNightURL = url?.appendingPathComponent("1349bfa0ed08485d8a92c442a3850b06")
+//        let customNightLayer = AGSArcGISVectorTiledLayer(url: defaultURL!)
+//        ,
+//        "9a01f41307ec4add9121a40cf020a6b6": AGSArcGISVectorTiledLayer(),
+//        "ce8a34e5d4ca4fa193a097511daa8855": AGSArcGISVectorTiledLayer()
+    return [
+        "1349bfa0ed08485d8a92c442a3850b06": defaultLayer,
+        "bd8ac41667014d98b933e97713ba8377": style1Layer,
+        "02f85ec376084c508b9c8e5a311724fa": style2Layer,
+        "1bf0cc4a4380468fbbff107e100f65a5": style3Layer ]
+    }()
     // The item ID of the shown layer.
     var shownItemID: String?
     // The job to export the item resource cache.
-    var exportVectorTilesJob: AGSExportVectorTilesJob?
+    var exportVectorTilesJob: AGSExportVectorTilesJob? 
     // The vector tiled layer created by the local VTPK and day custom style.
     var dayVectorTiledLayer: AGSArcGISVectorTiledLayer?
     // The vector tiled layer created by the local VTPK and night custom style.
@@ -66,7 +89,8 @@ class VectorTileCustomStyleViewController: UIViewController, VectorStylesVCDeleg
                 // Get the item resource cache from the result.
                 let itemresourceCahce = result.itemResourceCache
                 // Create a vector tiled layer with the vector tiled cache and the item resource cache.
-                offlineVectorTiledLayer = AGSArcGISVectorTiledLayer(vectorTileCache: vectorTileCache, itemResourceCache: itemresourceCahce)
+                let offlineVectorTiledLayer = AGSArcGISVectorTiledLayer(vectorTileCache: vectorTileCache, itemResourceCache: itemresourceCahce)
+                itemIDs.append
             } else if let error = error {
                 // Handle errors.
                 self.presentAlert(error: error)

@@ -44,7 +44,7 @@ class VectorStylesViewController: UITableViewController {
     // MARK: - UITableViewDelegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let itemID = itemIDs[indexPath.row]
-        delegate?.vectorStylesViewController(self, didSelectItemWithID: itemID)
+        delegate?.vectorStylesViewController(self, didSelectItemWithID: itemID.key)
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
     }
     
